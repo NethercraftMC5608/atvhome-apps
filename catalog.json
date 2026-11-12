@@ -1,0 +1,17 @@
+{
+  "name": "ATVHome Apps",
+  "apps": [
+    {
+      "id": "com.atvkit.example.hello",
+      "name": "Hello",
+      "version": "1.0",
+      "author": "ATVKit",
+      "description": "The ATVKit sample app: a message, the on-screen keyboard and a video. Copy it to start your own.",
+      "icon": "https://raw.githubusercontent.com/NethercraftMC5608/atvhome-apps/main/icons/com.atvkit.example.hello.png",
+      "package": "https://github.com/NethercraftMC5608/atvhome-apps/releases/download/Hello-1.0/Hello-1.0.zip",
+      "sha256": "9e2875d972071133180b6f8047fb12919aff5afc7c74fc2635af95089c3fa52d",
+      "size": 10975,
+      "minATVKit": "0.2"
+    }
+  ]
+}
