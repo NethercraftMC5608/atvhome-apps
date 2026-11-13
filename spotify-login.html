@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Spotify · Apple TV</title>
+<style>
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+body {
+  margin: 0; min-height: 100vh; padding: 24px;
+  background: #0b0f0c; color: #e9f1ec;
+  font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  display: -webkit-box; display: -webkit-flex; display: flex;
+  -webkit-box-align: center; -webkit-align-items: center; align-items: center;
+  -webkit-box-pack: center; -webkit-justify-content: center; justify-content: center;
+}
+.card {
+  width: 100%; max-width: 520px; background: #121a15; border: 1px solid #22332a;
+  border-radius: 22px; padding: 30px 26px; box-shadow: 0 24px 70px rgba(0,0,0,.45);
+}
+.mark {
+  width: 56px; height: 56px; border-radius: 50%; background: #1ed760;
+  display: -webkit-box; display: -webkit-flex; display: flex;
+  -webkit-box-align: center; -webkit-align-items: center; align-items: center;
+  -webkit-box-pack: center; -webkit-justify-content: center; justify-content: center;
+  margin-bottom: 18px;
+}
+.mark svg { width: 31px; height: 31px; fill: #07100b; }
+h1 { font-size: 1.6rem; line-height: 1.2; margin: 0 0 10px; }
+p { margin: 0 0 14px; color: #b7c6bd; }
+strong { color: #e9f1ec; }
+.spinner {
+  width: 22px; height: 22px; margin: 6px 0 18px; border-radius: 50%;
+  border: 2px solid #2a4234; border-top-color: #1ed760;
+  -webkit-animation: spin .9s linear infinite; animation: spin .9s linear infinite;
+}
+@-webkit-keyframes spin { to { -webkit-transform: rotate(360deg); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+.hint { font-size: .88rem; color: #8fa398; margin: 16px 0 0; }
+.bad { border-radius: 12px; padding: 12px 14px; background: #35171a; border: 1px solid #6b2a30; color: #ffbec3; margin: 0 0 16px; }
+.good { border-radius: 12px; padding: 12px 14px; background: #10301e; border: 1px solid #1b5c37; color: #9ff0bf; margin: 0 0 16px; }
+a { color: #1ed760; }
+.link { display: inline-block; margin-top: 10px; font-weight: 600; }
+</style>
+</head>
+<body>
+<main class="card" id="card">
+  <div class="mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.2 8.4c3.9-1.1 8.3-.8 11.5 1.1.6.4 1.3.2 1.6-.4.4-.6.2-1.3-.4-1.6-3.7-2.2-8.6-2.5-13-1.3-.7.2-1.1.9-.9 1.6.2.6.9 1 1.2.6zm-.4 3.2c3.2-.9 6.9-.6 9.6 1 .5.3 1.1.1 1.3-.4.3-.5.1-1.1-.4-1.4-3-1.8-7.1-2.1-10.8-1.1-.6.2-.9.8-.7 1.3.1.4.6.7 1 .6zm.3 3.1c2.6-.7 5.5-.4 7.6.9.4.2.8.1 1-.3.2-.4.1-.8-.3-1-2.4-1.4-5.7-1.7-8.7-.9-.4.1-.7.6-.5 1 .1.3.5.5.9.3z"/></svg></div>
+  <h1 id="title">Connecting to your Apple TV…</h1>
+  <p id="text">One moment.</p>
+  <div class="spinner" id="spinner"></div>
+  <p class="hint" id="hint"></p>
+</main>
+<script>
+(function () {
+  "use strict";
+
+  // Keep these in sync with SpotifyAuth.m. The page asks Spotify for exactly what the TV uses.
+  var SCOPES = "user-read-private user-read-playback-state user-modify-playback-state " +
+               "user-read-recently-played user-library-read playlist-read-private " +
+               "playlist-read-collaborative";
+  var PREFIX = "atv-spotify:";
+  var title = document.getElementById("title");
+  var text = document.getElementById("text");
+  var hint = document.getElementById("hint");
+  var spinner = document.getElementById("spinner");
+  var card = document.getElementById("card");
+
+  function parse(value) {
+    var out = {};
+    if (!value) return out;
+    if (value.charAt(0) === "?" || value.charAt(0) === "#") value = value.substring(1);
+    var parts = value.split("&");
+    for (var i = 0; i < parts.length; i++) {
+      if (!parts[i]) continue;
+      var eq = parts[i].indexOf("=");
+      var k = eq < 0 ? parts[i] : parts[i].substring(0, eq);
+      var v = eq < 0 ? "" : parts[i].substring(eq + 1);
+      try { k = decodeURIComponent(k.replace(/\+/g, " ")); } catch (e) {}
+      try { v = decodeURIComponent(v.replace(/\+/g, " ")); } catch (e) {}
+      out[k] = v;
+    }
+    return out;
+  }
+
+  function store(key, value) {
+    try { window.sessionStorage.setItem(key, value); } catch (e) {}
+    try { window.localStorage.setItem(key, value); } catch (e) {}
+  }
+
+  function load(key) {
+    var value = null;
+    try { value = window.sessionStorage.getItem(key); } catch (e) {}
+    if (!value) { try { value = window.localStorage.getItem(key); } catch (e) {} }
+    return value;
+  }
+
+  function show(t, m, isBad) {
+    title.innerHTML = t;
+    text.innerHTML = m;
+    if (isBad) {
+      spinner.style.display = "none";
+      var banner = document.createElement("div");
+      banner.className = "bad";
+      banner.innerHTML = m;
+      text.parentNode.insertBefore(banner, text.nextSibling);
+      text.style.display = "none";
+    }
+  }
+
+  function safe(v) {
+    return String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  var query = parse(window.location.search);
+  var hash = parse(window.location.hash);
+
+  // Returning from Spotify: hand the one-time code to the TV over the home network.
+  if (query.code || query.error) {
+    var state = query.state || "";
+    var saved = state ? load(PREFIX + state) : null;
+    var session = null;
+    if (saved) { try { session = JSON.parse(saved); } catch (e) {} }
+    if (query.error) {
+      show("Sign-in wasn’t completed", "Spotify returned <strong>" + safe(query.error) + "</strong>. Scan the QR code on your Apple TV again.", true);
+      return;
+    }
+    if (!session) {
+      show("This sign-in expired", "Scan the QR code on your Apple TV again. The page could not find the TV’s one-time sign-in session.", true);
+      return;
+    }
+    var tv = "http://" + session.ip + ":" + session.port + "/login?code=" +
+             encodeURIComponent(query.code) + "&state=" + encodeURIComponent(state) +
+             "&r=" + encodeURIComponent(session.redirect);
+    title.innerHTML = "You’re signed in";
+    text.innerHTML = "Taking you back to your Apple TV…";
+    hint.innerHTML = "If nothing happens, make sure this phone is on the same Wi-Fi as the Apple TV, then " +
+                     "<a class=\"link\" href=\"" + safe(tv) + "\">open the Apple TV page</a>.";
+    window.setTimeout(function () { window.location.replace(tv); }, 700);
+    return;
+  }
+
+  // Arriving from the TV’s QR code: begin the Spotify login.
+  if (!hash.cid || !hash.ip || !hash.port || !hash.s || !hash.c ||
+      !/^[A-Za-z0-9.\-]+$/.test(hash.ip) || !/^\d{1,5}$/.test(hash.port)) {
+    show("Open this page from your Apple TV", "Scan the QR code in the Spotify app on your Apple TV. This page only works with that one-time code.", true);
+    return;
+  }
+
+  var redirect = window.location.protocol + "//" + window.location.host + window.location.pathname;
+  var oneTime = { ip: hash.ip, port: hash.port, state: hash.s, redirect: redirect, created: new Date().getTime() };
+  store(PREFIX + hash.s, JSON.stringify(oneTime));
+
+  var authorize = "https://accounts.spotify.com/authorize" +
+    "?client_id=" + encodeURIComponent(hash.cid) +
+    "&response_type=code" +
+    "&redirect_uri=" + encodeURIComponent(redirect) +
+    "&code_challenge_method=S256" +
+    "&code_challenge=" + encodeURIComponent(hash.c) +
+    "&state=" + encodeURIComponent(hash.s) +
+    "&scope=" + encodeURIComponent(SCOPES);
+
+  title.innerHTML = "Continue in Spotify";
+  text.innerHTML = "Approve access for <strong>your Apple TV</strong>. Spotify handles the password — this page never sees it.";
+  hint.innerHTML = "Not opening? <a class=\"link\" href=\"" + safe(authorize) + "\">Open Spotify sign-in</a>.";
+  window.setTimeout(function () { window.location.replace(authorize); }, 700);
+})();
+</script>
+</body>
+</html>
