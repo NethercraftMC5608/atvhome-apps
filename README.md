@@ -36,3 +36,10 @@ The Store downloads `catalog.json` from this repository's `main` branch.
 The `validate` workflow checks every pull request: valid JSON, required fields, unique ids,
 the zip downloads, its SHA-256 matches, it contains exactly one `.tvapp` whose Info.plist
 id and version match the entry.
+
+## ATVHome updates
+
+`update.json` is the Software Update feed for ATVHome itself (Settings › System › Software
+Update), next to the release package it points to (`ATVHome-<version>.tgz`). Both are made by
+`make release` in ATV Revival and signed with the release key: an Apple TV only installs a
+package whose signature and checksum check out, so don't edit these files by hand.
