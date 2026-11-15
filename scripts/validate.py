@@ -23,6 +23,20 @@ for i, a in enumerate(apps):
         errors.append(f"{where}: package must be an https URL")
     if not re.fullmatch(r"[0-9a-f]{64}", a.get("sha256", "")):
         errors.append(f"{where}: sha256 must be 64 lowercase hex digits")
+    if "--download" in sys.argv and not errors and a.get("type") == "system":
+        # System package (Kodi): "package" is a signed feed; sha256 pins the feed itself, and
+        # the feed's manifest pins the .tgz. (Boxes check the signature; this checks the hashes.)
+        import base64
+        feed = urllib.request.urlopen(a["package"], timeout=60).read()
+        if hashlib.sha256(feed).hexdigest() != a["sha256"]:
+            errors.append(f"{where}: sha256 doesn't match the feed"); continue
+        m = json.loads(base64.b64decode(json.loads(feed)["manifest"]))
+        if m.get("id") != a["id"] or m.get("version") != a["version"]:
+            errors.append(f"{where}: feed is for {m.get('id')} {m.get('version')}"); continue
+        pkg = urllib.request.urljoin(a["package"], m["package"])
+        if hashlib.sha256(urllib.request.urlopen(pkg, timeout=600).read()).hexdigest() != m["sha256"]:
+            errors.append(f"{where}: package doesn't match its manifest")
+        continue
     if "--download" in sys.argv and not errors:
         data = urllib.request.urlopen(a["package"], timeout=60).read()
         if hashlib.sha256(data).hexdigest() != a["sha256"]:

@@ -2,6 +2,35 @@
   "name": "ATVHome Apps",
   "apps": [
     {
+      "id": "org.xbmc.kodi-ios",
+      "name": "Kodi",
+      "version": "18.9",
+      "type": "system",
+      "author": "Team Kodi (packaged by ATVHome)",
+      "description": "The media centre: your movies, shows and music from the network or a drive. Repackaged for the Apple TV 3 with ATVHome's fixes (full screen, remote, settings tuned for the A5). Installs as a system app (about 1–2 minutes).",
+      "icon": "https://raw.githubusercontent.com/NethercraftMC5608/atvhome-apps/main/icons/org.xbmc.kodi-ios.png",
+      "package": "https://github.com/NethercraftMC5608/atvhome-apps/releases/download/Kodi-18.9/Kodi-18.9.json",
+      "sha256": "7c681d6d4dad082e6fe9b5301e6f2e9ae8e3787fbf3155276bd0057ac8c3b6c7",
+      "size": 87918788,
+      "installedPath": "/Applications/Kodi.app",
+      "machines": [
+        "AppleTV3"
+      ],
+      "minATVKit": "0.6.1"
+    },
+    {
+      "id": "com.atvkit.app.moonlight",
+      "name": "Moonlight",
+      "version": "0.1",
+      "author": "ATV Revival (Moonlight: moonlight-stream.org, GPL-3)",
+      "description": "Stream games from a PC or Mac running Sunshine. Pairs with a PIN, smooth frame pacing, on-screen stats, PS5 controller or mouse and keyboard. 720p60 on the Apple TV 3, 720p30 on the Apple TV 2.",
+      "icon": "https://raw.githubusercontent.com/NethercraftMC5608/atvhome-apps/main/icons/com.atvkit.app.moonlight.png",
+      "package": "https://github.com/NethercraftMC5608/atvhome-apps/releases/download/Moonlight-0.1/Moonlight-0.1.zip",
+      "sha256": "03bb1ed6e6245e84a03e1f87fa0ede993ce4b8e9b0e46ef18b0e26ee9eb09a50",
+      "size": 1592697,
+      "minATVKit": "0.6.1"
+    },
+    {
       "id": "com.atvkit.example.hello",
       "name": "Hello",
       "version": "1.0",
