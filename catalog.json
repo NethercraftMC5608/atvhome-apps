@@ -10,8 +10,8 @@
       "description": "The media centre: your movies, shows and music from the network or a drive. Repackaged for the Apple TV 3 with ATVHome's fixes (full screen, remote, settings tuned for the A5). Installs as a system app (about 1–2 minutes).",
       "icon": "https://raw.githubusercontent.com/NethercraftMC5608/atvhome-apps/main/icons/org.xbmc.kodi-ios.png",
       "package": "https://github.com/NethercraftMC5608/atvhome-apps/releases/download/Kodi-18.9/Kodi-18.9.json",
-      "sha256": "7c681d6d4dad082e6fe9b5301e6f2e9ae8e3787fbf3155276bd0057ac8c3b6c7",
-      "size": 87918788,
+      "sha256": "ca0c2592688f979d0198c2bb8af7fcec029b18a9d0cf0d59041d7f7b3fb3fb62",
+      "size": 87918901,
       "installedPath": "/Applications/Kodi.app",
       "machines": [
         "AppleTV3"
